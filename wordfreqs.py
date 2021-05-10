@@ -1,7 +1,8 @@
 # Imports
-import os, json, sys
+import os, json, sys, time
 from collections import defaultdict
 import tweepy
+import tqdm
 
 # API keys as environment variables
 from dotenv import load_dotenv
@@ -34,18 +35,37 @@ api = tweepy.API(auth)
     #     wait_on_rate_limit = True
     #     )
         
-def get_timeline(screen_name, count=3200, save_json=True):
+def get_timeline(screen_name, count=3200, save_json=True, sleep_on_rate_limit=False):
     timeline = []
-    statuses = tweepy.Cursor(api.user_timeline, screen_name=screen_name, count=count).items()
-    for status in statuses:
-        timeline.append(status.text)
+    statuses = tweepy.Cursor(api.user_timeline, 
+        screen_name=screen_name, count=count, tweet_mode='extended').items()
+    for i, status in enumerate(statuses):
+        timeline.append(status.full_text)
+        if sleep_on_rate_limit and i % 1000 == 0: # Wait out the API rate limit
+            print(f"Got {i} statuses. Sleeping 15 mins...")
+            for _ in tqdm(range(15)):
+                time.sleep(60)
     
     if save_json:
-        json_path = os.path.join(TIMELINES_PATH, f'{screen_name}.json')
+        json_path = os.path.join(TIMELINES_PATH, f'{screen_name}2.json')
         with open(json_path, mode='w', encoding='utf-8') as f:
             json.dump(timeline, f, indent=2, ensure_ascii=False)
     
     return timeline
+
+def proc_timeline(timeline):
+    ret = []
+    for twt in timeline:
+        # remove retweets
+        if twt[:3] == "RT ":
+            continue
+        # remove @s, links, ellipses for truncated tweets
+        twt = ' '.join(word for word in twt.split(' ') if (word and
+            word[0] != '@' and word[:4] != 'http' and word[-1] != '…'))
+        
+        if twt:
+            ret.append(twt)
+    return ret
 
 # gets word frequencies given screen name or Twitter timeline
 def word_freq(screen_name, save_json=True):
@@ -54,7 +74,9 @@ def word_freq(screen_name, save_json=True):
         with open(timeline_path, mode='r', encoding='utf-8') as f:
             timeline = json.load(f)
     else:
-        timeline = get_timeline(screen_name, count=3200)
+        timeline = get_timeline(screen_name, count=3200, save_json=save_json)
+
+    timeline = proc_timeline(timeline)
 
     freqs = defaultdict(int)
     for tweet in timeline:
@@ -72,7 +94,9 @@ def word_freq(screen_name, save_json=True):
 if __name__ == "__main__":
     screen_name = sys.argv[1]
     tokenizer = BertWordPieceTokenizer("bert-base-uncased-vocab.txt", lowercase=True)
+    timeline = get_timeline(screen_name, count=3200, save_json=False)
+
     freqs = word_freq(screen_name)
-    print(sorted(list(freqs.keys()), key=lambda i: freqs[i]))
+    # print(sorted(list(freqs.keys()), key=lambda i: freqs[i]))
 
     
