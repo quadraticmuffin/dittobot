@@ -36,13 +36,13 @@ api = tweepy.API(auth)
     #     wait_on_rate_limit = True
     #     )
         
-def get_timeline(screen_name, count=3200, save_json=True, sleep_on_rate_limit=False):
+def get_timeline(screen_name, count=3200, save_json=True, sleep_every=-1):
     timeline = []
     statuses = tweepy.Cursor(api.user_timeline, 
         screen_name=screen_name, count=count, tweet_mode='extended').items()
     for i, status in enumerate(statuses):
         timeline.append(status.full_text)
-        if sleep_on_rate_limit and (i+1) % 1000 == 0: # Wait out the API rate limit
+        if sleep_every>0 and (i+1) % sleep_every == 0: # Wait out the API rate limit
             print(f"Got {i} statuses. Sleeping 15 mins...")
             for _ in tqdm(range(15)):
                 time.sleep(60)
@@ -95,7 +95,7 @@ def word_freq(screen_name, save_json=True):
 if __name__ == "__main__":
     screen_name = sys.argv[1]
     tokenizer = BertWordPieceTokenizer("bert-base-uncased-vocab.txt", lowercase=True)
-    timeline = get_timeline(screen_name, count=3200, save_json=True, sleep_on_rate_limit=500)
+    timeline = get_timeline(screen_name, count=10000, save_json=True, sleep_every=500)
 
     freqs = word_freq(screen_name, save_json=False)
     # print(sorted(list(freqs.keys()), key=lambda i: freqs[i]))
