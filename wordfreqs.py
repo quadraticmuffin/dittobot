@@ -1,8 +1,9 @@
 # Imports
 import os, json, sys, time
 from collections import defaultdict
+from types import SimpleNamespace
 import tweepy
-import tqdm
+from tqdm import tqdm
 
 # API keys as environment variables
 from dotenv import load_dotenv
@@ -41,13 +42,13 @@ def get_timeline(screen_name, count=3200, save_json=True, sleep_on_rate_limit=Fa
         screen_name=screen_name, count=count, tweet_mode='extended').items()
     for i, status in enumerate(statuses):
         timeline.append(status.full_text)
-        if sleep_on_rate_limit and i % 1000 == 0: # Wait out the API rate limit
+        if sleep_on_rate_limit and (i+1) % 1000 == 0: # Wait out the API rate limit
             print(f"Got {i} statuses. Sleeping 15 mins...")
             for _ in tqdm(range(15)):
                 time.sleep(60)
     
     if save_json:
-        json_path = os.path.join(TIMELINES_PATH, f'{screen_name}2.json')
+        json_path = os.path.join(TIMELINES_PATH, f'{screen_name}.json')
         with open(json_path, mode='w', encoding='utf-8') as f:
             json.dump(timeline, f, indent=2, ensure_ascii=False)
     
@@ -94,9 +95,9 @@ def word_freq(screen_name, save_json=True):
 if __name__ == "__main__":
     screen_name = sys.argv[1]
     tokenizer = BertWordPieceTokenizer("bert-base-uncased-vocab.txt", lowercase=True)
-    timeline = get_timeline(screen_name, count=3200, save_json=False)
+    timeline = get_timeline(screen_name, count=3200, save_json=True, sleep_on_rate_limit=500)
 
-    freqs = word_freq(screen_name)
+    freqs = word_freq(screen_name, save_json=False)
     # print(sorted(list(freqs.keys()), key=lambda i: freqs[i]))
 
     
