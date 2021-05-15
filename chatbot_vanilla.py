@@ -15,7 +15,7 @@ def sample_seq(personality, freqs, history, tokenizer, model, current_output=Non
         current_output = []
 
     for i in range(FLAGS.max_length):
-        #give verbose output
+        # give verbose output
         if verbose:
           print(f"\nToken {i}")
 
@@ -59,6 +59,11 @@ def respond(text, history, personality, freqs, verbose=True):
     print(out_text)
     return 1
 
+def run(info, freq, verbose=False):
+    history = []
+    while True and respond(input('>>> '), history, info, freq, verbose=verbose):
+        continue
+
 if __name__=="__main__":
     tokenizer_class, model_class = OpenAIGPTTokenizer, OpenAIGPTLMHeadModel
     print('Getting model...')
@@ -82,7 +87,5 @@ if __name__=="__main__":
               "I served as a U.S. senator from Illinois from 2005 to 2008 and as an Illinois state senator from 1997 to 2004"],
               "I was born in Honolulu, Hawaii.")['input_ids']
 
-    history = []
-    while True and respond(input('>>> '), history, obama_info, freq_diff, verbose=False):
-        continue
-    print(history)
+    run(obama_info, freq_diff)
+    

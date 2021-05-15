@@ -18,4 +18,5 @@ parser.add_argument("--temperature", type=float, default=0.7, help="Sampling sof
 parser.add_argument("--top_k", type=int, default=0, help="Filter top-k tokens before sampling (<=0: no filtering)")
 parser.add_argument("--top_p", type=float, default=0.9, help="Nucleus filtering (top-p) before sampling (<=0.0: no filtering)")
 
+parser.add_argument("--qa_conf_thresh", type=float, default=0.5, help="Minimum score needed for qa output to be used")
 FLAGS = parser.parse_args()

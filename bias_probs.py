@@ -35,15 +35,18 @@ def bias_probs(probs, bias, method):
 
 def biased_next_token_probs(personality, history, tokenizer, model, current_output, bias, method, verbose=False):
     vanilla_probs = next_token_probs(personality, history, tokenizer, model, current_output)
-    new_probs = bias_probs(vanilla_probs, bias, method)
-
-    #output verbose info if needed
+    
+    # output verbose info if needed
     def ids_to_token_list(ids):
         return [tokenizer.convert_tokens_to_string(x) for x in tokenizer.convert_ids_to_tokens(ids)]
     if verbose:
         k_print = 8
         print("Before: ", ids_to_token_list(torch.topk(vanilla_probs, k_print)[1]))
         print(list(round(x.item(), 3) for x in torch.topk(vanilla_probs, k_print)[0]))
+
+    new_probs = bias_probs(vanilla_probs, bias, method)
+
+    if verbose:
         print("After: ", ids_to_token_list(torch.topk(new_probs, k_print)[1]))
         print(list(round(x.item(), 3) for x in torch.topk(new_probs, k_print)[0]))
 
