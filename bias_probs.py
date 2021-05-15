@@ -10,8 +10,7 @@ def next_token_probs(personality, history, tokenizer, model, current_output):
     input_ids = torch.tensor(instance["input_ids"], device=FLAGS.device).unsqueeze(0)
     token_type_ids = torch.tensor(instance["token_type_ids"], device=FLAGS.device).unsqueeze(0)
 
-    output = model(input_ids, token_type_ids=token_type_ids)
-    logits = output.logits
+    logits = model(input_ids, token_type_ids=token_type_ids)
 
     if isinstance(logits, tuple):  # for gpt2 and maybe others
         logits = logits[0]
@@ -35,7 +34,7 @@ def bias_probs(probs, bias, method):
 
 def biased_next_token_probs(personality, history, tokenizer, model, current_output, bias, method, verbose=False):
     vanilla_probs = next_token_probs(personality, history, tokenizer, model, current_output)
-    
+
     # output verbose info if needed
     def ids_to_token_list(ids):
         return [tokenizer.convert_tokens_to_string(x) for x in tokenizer.convert_ids_to_tokens(ids)]
