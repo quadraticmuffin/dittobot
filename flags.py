@@ -20,9 +20,11 @@ parser.add_argument("--top_p", type=float, default=0.9, help="Nucleus filtering 
 
 parser.add_argument("--bias_cap", type=float, default=2.0, help="Caps the amount of word frequency bias")
 
-parser.add_argument("--use_qa", type=bool, default=True, help="Whether to use QA model to help answer questions")
+parser.add_argument("--insert_qa", type=str, default="at_start", help="How/when to insert QA model's answer. options are [`at_start`, `if_most_likely`, `none`]")
 parser.add_argument("--qa_conf_thresh", type=float, default=0.5, help="Minimum score needed for qa output to be used")
 
 parser.add_argument("--username", type=str, default="BarackObama", help="(case-sensitive) Twitter username of interest.")
 parser.add_argument("--name", type=str, default="Barack Obama", help="Name of interest, e.g. `lebron james` or `rihanna`")
+
+parser.add_argument("--verbose", type=int, default="1")
 FLAGS = parser.parse_args()

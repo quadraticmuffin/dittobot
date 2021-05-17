@@ -16,12 +16,10 @@ CONSUMER_KEY = os.getenv('CONSUMER_KEY')
 CONSUMER_SECRET = os.getenv('CONSUMER_SECRET')
 ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
-BEARER_TOKEN = os.getenv('BEARER_TOKEN')
 
 TIMELINES_PATH = "timelines"
 FREQS_PATH = "word-freqs"
 
-# auth = tweepy.AppAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
@@ -30,7 +28,6 @@ def get_twitter_screen_name(query):
     search_results = api.search_users(query, count=1, include_entities=False)
     name_opts = [user.screen_name for user in search_results]
     screen_name = name_opts[0]
-    print(f'Got Twitter user {screen_name}')
     return screen_name
 
 def get_timeline(screen_name, count=3200, save_json=True, sleep_every=0):
@@ -116,7 +113,9 @@ def freq_diffs(user, other, tokenizer):
     user_freqs = word_freqs(user, tokenizer)
     other_freqs = word_freqs(other, tokenizer)
     vocab = {**user_freqs, **other_freqs}.keys()
-    freq_diffs = {k: user_freqs[k] / (other_freqs[k] or 1) for k in vocab}
+    user_total = sum(user_freqs.values())
+    other_total = sum(other_freqs.values())
+    freq_diffs = {k: user_freqs[k] / (other_freqs[k] or 1) * (other_total/user_total) for k in vocab}
     return freq_diffs
 
 if __name__ == "__main__":

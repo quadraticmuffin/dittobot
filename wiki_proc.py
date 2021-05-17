@@ -1,5 +1,6 @@
 import wikipedia
 import re
+from flags import FLAGS
 
 class FromWiki:
     def __init__(self, info, context):
@@ -65,9 +66,8 @@ def remove_blurb(text):
 
 def info_and_context(name):
     summary = wikipedia.summary(name, auto_suggest=False)
-    summary = third_to_first(summary)
-    summary = remove_blurb(summary)
-    info = split_into_sentences(summary)[:5]
-    print(f'Wikipedia page begins:\n{" ".join(info[:2])}')
     context = summary
+    info = split_into_sentences(summary)[:5]
+    info = [third_to_first(sentence) for sentence in info]
+    info = [remove_blurb(info[0])] + info[1:]
     return FromWiki(info, context)

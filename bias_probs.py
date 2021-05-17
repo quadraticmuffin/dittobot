@@ -5,6 +5,7 @@ from huggingface.train import build_input_from_segments
 import warnings
 from flags import FLAGS
 import transformers
+from math import log
 
 def next_token_probs(personality, history, tokenizer, model, current_output):
     instance = build_input_from_segments(personality, history, current_output, tokenizer, with_eos=False)
@@ -37,22 +38,21 @@ def bias_probs(probs, bias, method):
     
     return probs
 
-def biased_next_token_probs(personality, history, tokenizer, model, current_output, bias, method, verbose=False):
+def biased_next_token_probs(personality, history, tokenizer, model, current_output, bias, method):
     vanilla_probs = next_token_probs(personality, history, tokenizer, model, current_output)
 
     # output verbose info if needed
     def ids_to_token_list(ids):
         return [tokenizer.convert_tokens_to_string(x) for x in tokenizer.convert_ids_to_tokens(ids)]
-    if verbose:
-        k_print = 8
-        print("Before: ", ids_to_token_list(torch.topk(vanilla_probs, k_print)[1]))
-        print(list(round(x.item(), 3) for x in torch.topk(vanilla_probs, k_print)[0]))
+    if FLAGS.verbose>1:
+        print("Vanilla Probs: ", ids_to_token_list(torch.topk(vanilla_probs, 8)[1]))
+        print('\t', list(round(x.item(), 3) for x in torch.topk(vanilla_probs, 8)[0]))
 
     new_probs = bias_probs(vanilla_probs, bias, method)
 
-    if verbose:
-        print("After: ", ids_to_token_list(torch.topk(new_probs, k_print)[1]))
-        print(list(round(x.item(), 3) for x in torch.topk(new_probs, k_print)[0]))
+    if FLAGS.verbose>0:
+        print("Biased Probs: ", ids_to_token_list(torch.topk(new_probs, 8)[1]))
+        print('\t', list(round(x.item(), 3) for x in torch.topk(new_probs, 8)[0]))
 
     return new_probs
 
@@ -66,3 +66,25 @@ def next_token_from_probs(new_probs, special_tokens_ids, i):
                 break  # avoid infinitely looping over special token
             prev = torch.multinomial(new_probs, num_samples=1)
     return prev
+
+# given some response and model parameters, this function evalutes the log probability of our model 
+# outputting that response
+def response_probability(response, personality, history, tokenizer, model, bias, current_output=None, method='cap'):
+    if current_output is None:
+        current_output = []
+    logprob = 0
+    enc_txt = tokenizer.encode(response)
+    for next_token in enc_txt: # iterate over enc_txt tokens
+        vanilla_probs = next_token_probs(personality, history, tokenizer, model, current_output)
+        biased_probs = bias_probs(vanilla_probs, bias, method)
+
+        # update total probability
+        prob = biased_probs[next_token]/torch.sum(biased_probs)
+        logprob += torch.log(prob) if prob > 0 else -100000
+        print(f'\tprob: {round(prob.item(), 3)}, logprob: {round(logprob.item(), 3)}, ' +
+                f'token: {tokenizer.decode(next_token)}')
+
+        # add this token to output
+        current_output.append(next_token)
+
+    return logprob

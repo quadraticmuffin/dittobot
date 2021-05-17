@@ -7,7 +7,7 @@ from flags import FLAGS
 from wiki_proc import info_and_context
 from chatbot_qa import run
 
-def end2end():
+if __name__ == '__main__':
     with no_grad(): # voodoo to prevent automatic differentiation/ weird errors?
         nlp = pipeline("question-answering")
 
@@ -19,13 +19,14 @@ def end2end():
     add_special_tokens_(model, tokenizer)
     
     screen_name = get_twitter_screen_name(FLAGS.name)
-    freq_diffs = freq_diffs(screen_name, 'persona', tokenizer)
+    if FLAGS.verbose:
+        print(f'Got Twitter user {screen_name}')
+    biases = freq_diffs(screen_name, 'persona', tokenizer)
 
     wiki = info_and_context(FLAGS.name)
     info, qa_context = wiki.info, wiki.context
+    if FLAGS.verbose:
+        print(f'Wikipedia page begins:\n{" ".join(info[:2])}')
     personality = tokenizer.batch_encode_plus([f'My name is {FLAGS.name}.'] + info)['input_ids']
 
-    run(personality, freq_diffs, qa_context, tokenizer, model, nlp, verbose=True)
-
-if __name__ == '__main__':
-    end2end()
+    run(personality, biases, qa_context, tokenizer, model, nlp)
