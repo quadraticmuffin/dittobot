@@ -18,6 +18,11 @@ parser.add_argument("--temperature", type=float, default=0.7, help="Sampling sof
 parser.add_argument("--top_k", type=int, default=0, help="Filter top-k tokens before sampling (<=0: no filtering)")
 parser.add_argument("--top_p", type=float, default=0.9, help="Nucleus filtering (top-p) before sampling (<=0.0: no filtering)")
 
+parser.add_argument("--bias_cap", type=float, default=2.0, help="Caps the amount of word frequency bias")
+
 parser.add_argument("--use_qa", type=bool, default=True, help="Whether to use QA model to help answer questions")
 parser.add_argument("--qa_conf_thresh", type=float, default=0.5, help="Minimum score needed for qa output to be used")
+
+parser.add_argument("--username", type=str, default="BarackObama", help="(case-sensitive) Twitter username of interest.")
+parser.add_argument("--name", type=str, default="Barack Obama", help="Name of interest, e.g. `lebron james` or `rihanna`")
 FLAGS = parser.parse_args()

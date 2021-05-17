@@ -2,7 +2,7 @@ from bias_probs import biased_next_token_probs, next_token_from_probs
 from huggingface.train import SPECIAL_TOKENS, add_special_tokens_
 from huggingface.utils import download_pretrained_model
 from transformers import OpenAIGPTTokenizer, OpenAIGPTLMHeadModel
-from wordfreqs import freqs_from_tweets
+from twitter_proc import freqs_from_tweets
 from flags import FLAGS
 from collections import defaultdict
 import torch
@@ -44,7 +44,7 @@ def sample_seq(personality, freqs, history, tokenizer, model, current_output=Non
 
 #function to talk with bot with modified decoding strategy
 #text is just a string from the user to the bot and history is a tokenized history of the past conversation
-def respond(text, history, personality, freqs, verbose=True):
+def respond(text, history, personality, freqs, tokenizer, verbose=True):
     #make sure the text isn't empty
     if not text or text=='exit':
         print('Conversation terminated by user')
@@ -59,9 +59,9 @@ def respond(text, history, personality, freqs, verbose=True):
     print(out_text)
     return 1
 
-def run(info, freq, verbose=False):
+def run(info, freq, tokenizer, verbose=False):
     history = []
-    while True and respond(input('>>> '), history, info, freq, verbose=verbose):
+    while True and respond(input('>>> '), history, info, freq, tokenizer, verbose=verbose):
         continue
 
 if __name__=="__main__":
@@ -87,5 +87,5 @@ if __name__=="__main__":
               "I served as a U.S. senator from Illinois from 2005 to 2008 and as an Illinois state senator from 1997 to 2004"],
               "I was born in Honolulu, Hawaii.")['input_ids']
 
-    run(obama_info, freq_diff)
+    run(obama_info, freq_diff, tokenizer)
     

@@ -4,13 +4,18 @@ from huggingface.interact import top_filtering
 from huggingface.train import build_input_from_segments
 import warnings
 from flags import FLAGS
+import transformers
 
 def next_token_probs(personality, history, tokenizer, model, current_output):
     instance = build_input_from_segments(personality, history, current_output, tokenizer, with_eos=False)
     input_ids = torch.tensor(instance["input_ids"], device=FLAGS.device).unsqueeze(0)
     token_type_ids = torch.tensor(instance["token_type_ids"], device=FLAGS.device).unsqueeze(0)
 
-    logits = model(input_ids, token_type_ids=token_type_ids)
+    output = model(input_ids, token_type_ids=token_type_ids)
+    if transformers.__version__ >= '4':
+        logits = output.logits
+    else:
+        logits = output
 
     if isinstance(logits, tuple):  # for gpt2 and maybe others
         logits = logits[0]
@@ -28,7 +33,7 @@ def bias_probs(probs, bias, method):
     if method == 'cap':
         for i in range(len(probs)):
             if i in bias:
-                probs[i] *= max(0.5, min(2, bias[i]))
+                probs[i] *= max(1/FLAGS.bias_cap, min(FLAGS.bias_cap, bias[i]))
     
     return probs
 
