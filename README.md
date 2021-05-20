@@ -11,8 +11,8 @@ Clone this repo, then run the following from the cloned directory:
 pip install -r requirements.txt
 python end2end.py --name="name"
 ```
-where "name" should be in quotes if there are spaces in the name.
-
+where "name" should be in quotes if there are spaces in the name, and commonly used/capitalized names should be used when possible ("Cardi B", not "cardi b" or "Belcalis Marlenis Almánzar")
+Since we can't share Twitter API tokens, this currently only works for the public figures which already have word frequencies saved in `./word-freqs`. 
 To see some of the inner workings of the chatbot, add the option ```--verbose={1-3}```. Default is 1.
 
 ## Models Used
