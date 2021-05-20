@@ -5,24 +5,25 @@ import tweepy
 
 # API keys as environment variables
 from dotenv import load_dotenv
-load_dotenv()
+try:
+    load_dotenv()
+    CONSUMER_KEY = os.getenv('CONSUMER_KEY')
+    CONSUMER_SECRET = os.getenv('CONSUMER_SECRET')
+    ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+    ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    api = tweepy.API(auth)
+except:
+    print("Couldn't load Twitter API tokens from .env file")
 
 # Pre-trained Tokenizer
 from transformers import OpenAIGPTTokenizer, OpenAIGPTLMHeadModel
 from huggingface.train import add_special_tokens_
 from huggingface.utils import download_pretrained_model, get_dataset
 
-CONSUMER_KEY = os.getenv('CONSUMER_KEY')
-CONSUMER_SECRET = os.getenv('CONSUMER_SECRET')
-ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
-ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
-
 TIMELINES_PATH = "timelines"
 FREQS_PATH = "word-freqs"
-
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-api = tweepy.API(auth)
 
 def get_twitter_screen_name(query):
     search_results = api.search_users(query, count=1, include_entities=False)

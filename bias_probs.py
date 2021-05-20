@@ -33,7 +33,6 @@ def bias_probs(probs, bias):
                 probs[i] *= max(1/FLAGS.bias_cap, min(FLAGS.bias_cap, bias[i]))
             elif FLAGS.bias_method == 'scale':
                 probs[i] *= bias[i] * FLAGS.bias_scale
-
     
     return probs
 
@@ -68,19 +67,20 @@ def next_token_from_probs(new_probs, special_tokens_ids, i):
 
 # given some response and model parameters, this function evalutes the log probability of our model 
 # outputting that response
-def response_probability(response, personality, history, tokenizer, model, bias, current_output=None):
+def response_probability(response, personality, history, tokenizer, model, bias, use_bias=False, current_output=None):
     if current_output is None:
         current_output = []
     logprob = 0
     enc_txt = tokenizer.encode(response)
     for next_token in enc_txt: # iterate over enc_txt tokens
-        vanilla_probs = next_token_probs(personality, history, tokenizer, model, current_output)
-        biased_probs = bias_probs(vanilla_probs, bias)
+        probs = next_token_probs(personality, history, tokenizer, model, current_output)
+        if use_bias:
+            probs = bias_probs(probs, bias)
 
         # update total probability
-        prob = biased_probs[next_token]/torch.sum(biased_probs)
-        logprob += torch.log(prob) if prob > 0 else -100000
-        print(f'\tprob: {round(prob.item(), 3)}, logprob: {round(logprob.item(), 3)}, ' +
+        prob = probs[next_token]/torch.sum(probs)
+        logprob += torch.log(prob).item() if prob > 0 else -100000
+        print(f'\tprob: {round(prob.item(), 3)}, logprob: {round(logprob, 3)}, ' +
                 f'token: {tokenizer.decode(next_token)}')
 
         # add this token to output

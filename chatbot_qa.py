@@ -76,9 +76,9 @@ def respond(text, history, personality, freqs, context, tokenizer, model, nlp):
     print(out_text)
     if FLAGS.verbose > 2:
         print("\nno bias probabilities")
-        response_probability(out_text, personality, history, tokenizer, model, freqs)
+        response_probability(out_text, personality, history, tokenizer, model, freqs, use_bias=False)
         print("\nbias probabilities")
-        response_probability(out_text, personality, history, tokenizer, model, freqs)
+        response_probability(out_text, personality, history, tokenizer, model, freqs, use_bias=True)
     return 1
 
 

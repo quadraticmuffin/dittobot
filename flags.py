@@ -22,7 +22,7 @@ parser.add_argument("--bias_method", type=str, default='cap', help="Method to bi
 parser.add_argument("--bias_cap", type=float, default=2.0, help="Caps the amount of word frequency bias")
 parser.add_argument("--bias_scale", type=float, default=1.0, help="constant by which to multiply the bias factor")
 
-parser.add_argument("--insert_qa_cond", type=str, default="retro    ", help="How/when to insert QA model's answer. choices: [`at_start`, `if_most_likely`, `retro`, `none`]")
+parser.add_argument("--insert_qa_cond", type=str, default="retro", help="How/when to insert QA model's answer. choices: [`at_start`, `if_most_likely`, `retro`, `none`]")
 parser.add_argument("--qa_conf_thresh", type=float, default=0.5, help="Minimum score needed for qa output to be used")
 
 parser.add_argument("--username", type=str, default="BarackObama", help="(case-sensitive) Twitter username of interest.")
