@@ -5,7 +5,7 @@ Adds individual personality to HuggingFace chatbot using celebrity Tweets and Wi
 This takes any sufficiently well-known name (e.g. "obama" or "Justin Bieber") and creates a chatbot based on the Wikipedia summary and recent Tweets of that person.
 Note: For best results, 'sufficiently well-known' means that the person of interest will be the first result when searching their name in Twitter or Wikipedia.
 
-### Usage
+### Usage (ONLY WORKS FOR EXISTING NAMES IN ./word-freqs)
 Clone this repo, then run the following from the cloned directory:
 ```
 pip install -r requirements.txt
