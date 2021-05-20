@@ -18,9 +18,11 @@ parser.add_argument("--temperature", type=float, default=0.7, help="Sampling sof
 parser.add_argument("--top_k", type=int, default=0, help="Filter top-k tokens before sampling (<=0: no filtering)")
 parser.add_argument("--top_p", type=float, default=0.9, help="Nucleus filtering (top-p) before sampling (<=0.0: no filtering)")
 
+parser.add_argument("--bias_method", type=str, default='cap', help="Method to bias the model probs. choices: ['naive', 'cap', 'scale']")
 parser.add_argument("--bias_cap", type=float, default=2.0, help="Caps the amount of word frequency bias")
+parser.add_argument("--bias_scale", type=float, default=1.0, help="constant by which to multiply the bias factor")
 
-parser.add_argument("--insert_qa", type=str, default="at_start", help="How/when to insert QA model's answer. options are [`at_start`, `if_most_likely`, `none`]")
+parser.add_argument("--insert_qa_cond", type=str, default="retro    ", help="How/when to insert QA model's answer. choices: [`at_start`, `if_most_likely`, `retro`, `none`]")
 parser.add_argument("--qa_conf_thresh", type=float, default=0.5, help="Minimum score needed for qa output to be used")
 
 parser.add_argument("--username", type=str, default="BarackObama", help="(case-sensitive) Twitter username of interest.")

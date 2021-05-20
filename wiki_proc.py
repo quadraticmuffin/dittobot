@@ -1,6 +1,5 @@
 import wikipedia
 import re
-from flags import FLAGS
 
 class FromWiki:
     def __init__(self, info, context):
